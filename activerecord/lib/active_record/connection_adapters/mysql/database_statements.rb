@@ -33,8 +33,8 @@ module ActiveRecord
           !READ_QUERY.match?(sql.b)
         end
 
-        def explain(arel, binds = [])
-          sql     = "EXPLAIN #{to_sql(arel, binds)}"
+        def explain(arel, binds = [], options = [])
+          sql     = build_explain_clause(options) + " " + to_sql(arel, binds)
           start   = Process.clock_gettime(Process::CLOCK_MONOTONIC)
           result  = exec_query(sql, "EXPLAIN", binds)
           elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
@@ -81,6 +81,12 @@ module ActiveRecord
 
         def high_precision_current_timestamp
           HIGH_PRECISION_CURRENT_TIMESTAMP
+        end
+
+        def build_explain_clause(options = [])
+          return "EXPLAIN" unless options.present?
+
+          "EXPLAIN #{options.join(" ").upcase}"
         end
 
         private
