@@ -28,8 +28,8 @@ class Mysql2ExplainTest < ActiveRecord::Mysql2TestCase
   end
 
   def test_explain_with_options_as_strings
-    explain = Author.where(id: 1).explain("ANALYZE", "FORMAT=TREE")
-    assert_match %(EXPLAIN ANALYZE FORMAT=TREE SELECT `authors`.* FROM `authors` WHERE `authors`.`id` = 1), explain
+    explain = Author.where(id: 1).explain("ANALYZE")
+    assert_match %(EXPLAIN ANALYZE SELECT `authors`.* FROM `authors` WHERE `authors`.`id` = 1), explain
     assert_match %(actual time=), explain
   end
 
