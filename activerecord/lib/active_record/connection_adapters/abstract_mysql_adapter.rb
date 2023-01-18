@@ -115,6 +115,19 @@ module ActiveRecord
         true
       end
 
+      def supports_explain_analyze?
+        if mariadb?
+          database_version <= "10.0"
+        else
+          database_version >= "6.0"
+        end
+      end
+
+      # https://mariadb.com/kb/en/analyze-statement/
+      def supports_analyze?
+        mariadb? && database_version >= "10.1.0"
+      end
+
       def supports_indexes_in_create?
         true
       end
