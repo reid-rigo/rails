@@ -22,21 +22,31 @@ class Mysql2ExplainTest < ActiveRecord::Mysql2TestCase
   end
 
   def test_explain_with_options_as_symbol
-    explain = Author.where(id: 1).explain(:analyze)
-    assert_match %(EXPLAIN ANALYZE SELECT `authors`.* FROM `authors` WHERE `authors`.`id` = 1), explain
-    assert_match %(actual time=), explain
+    explain = Author.where(id: 1).explain(explain_option)
+    assert_match %(EXPLAIN #{explain_option.to_s.upcase} SELECT `authors`.* FROM `authors` WHERE `authors`.`id` = 1), explain
+    assert_match %(actual time=), explain if supports_analyze?
   end
 
   def test_explain_with_options_as_strings
-    explain = Author.where(id: 1).explain("ANALYZE")
-    assert_match %(EXPLAIN ANALYZE SELECT `authors`.* FROM `authors` WHERE `authors`.`id` = 1), explain
-    assert_match %(actual time=), explain
+    explain = Author.where(id: 1).explain(explain_option.to_s.upcase)
+    assert_match %(EXPLAIN #{explain_option.to_s.upcase} SELECT `authors`.* FROM `authors` WHERE `authors`.`id` = 1), explain
+    assert_match %(actual time=), explain if supports_analyze?
   end
 
   def test_explain_options_with_eager_loading
-    explain = Author.where(id: 1).includes(:posts).explain(:analyze)
-    assert_match %(EXPLAIN ANALYZE SELECT `authors`.* FROM `authors` WHERE `authors`.`id` = 1), explain
-    assert_match %(EXPLAIN ANALYZE SELECT `posts`.* FROM `posts` WHERE `posts`.`author_id` = 1), explain
-    assert_match %(actual time=), explain
+    explain = Author.where(id: 1).includes(:posts).explain(explain_option)
+    assert_match %(EXPLAIN #{explain_option.to_s.upcase} SELECT `authors`.* FROM `authors` WHERE `authors`.`id` = 1), explain
+    assert_match %(EXPLAIN #{explain_option.to_s.upcase} SELECT `posts`.* FROM `posts` WHERE `posts`.`author_id` = 1), explain
+    assert_match %(actual time=), explain if supports_analyze?
+  end
+
+  private
+
+  def explain_option
+    supports_analyze? ? :analyze : :extended
+  end
+
+  def supports_analyze?
+    ActiveRecord::Base.connection.database_version >= "6.0"
   end
 end
