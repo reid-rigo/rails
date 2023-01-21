@@ -84,9 +84,10 @@ module ActiveRecord
         end
 
         def build_explain_clause(options = [])
-          return "EXPLAIN" unless options.present?
+          return "EXPLAIN" if options.empty?
 
           explain_clause = "EXPLAIN #{options.join(" ").upcase}"
+
           if explain_clause.include?("ANALYZE") && supports_analyze?
             explain_clause.sub("EXPLAIN ", "")
           else
@@ -206,8 +207,6 @@ module ActiveRecord
               end
             end
           end
-
-
       end
     end
   end

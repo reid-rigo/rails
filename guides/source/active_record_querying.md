@@ -2511,7 +2511,8 @@ and may yield this for PostgreSQL:
 
 [`explain`]: https://api.rubyonrails.org/classes/ActiveRecord/Relation.html#method-i-explain
 
-### Explain options
+### Explain Options
+
 For databases and adapters which support them (currently PostgreSQL and MySQL), options can be passed to provide deeper analysis:
 
 ```ruby

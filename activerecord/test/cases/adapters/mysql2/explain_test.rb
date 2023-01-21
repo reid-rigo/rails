@@ -56,5 +56,4 @@ class Mysql2ExplainTest < ActiveRecord::Mysql2TestCase
   def conn
     ActiveRecord::Base.connection
   end
-
 end
