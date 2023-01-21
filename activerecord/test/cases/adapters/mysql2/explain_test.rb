@@ -38,7 +38,6 @@ class Mysql2ExplainTest < ActiveRecord::Mysql2TestCase
   end
 
   private
-
     def explain_option
       supports_analyze? || supports_explain_analyze? ? :analyze : :extended
     end
