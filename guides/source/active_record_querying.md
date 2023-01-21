@@ -2513,11 +2513,46 @@ and may yield this for PostgreSQL:
 
 ### Explain Options
 
-For databases and adapters which support them (currently PostgreSQL and MySQL), options can be passed to provide deeper analysis:
+For databases and adapters which support them (currently PostgreSQL and MySQL), options can be passed to provide deeper analysis.
 
+Using PostgreSQL, the following
 ```ruby
 Customer.where(id: 1).joins(:orders).explain(:analyze, :verbose)
 ```
+yields
+```sql
+EXPLAIN (ANALYZE, VERBOSE) SELECT "shop_accounts".* FROM "shop_accounts" INNER JOIN "customers" ON "customers"."id" = "shop_accounts"."customer_id" WHERE "shop_accounts"."id" = $1 [["id", 1]]
+                                                                   QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop  (cost=0.30..16.37 rows=1 width=24) (actual time=0.003..0.004 rows=0 loops=1)
+   Output: shop_accounts.id, shop_accounts.customer_id, shop_accounts.customer_carrier_id
+   Inner Unique: true
+   ->  Index Scan using shop_accounts_pkey on public.shop_accounts  (cost=0.15..8.17 rows=1 width=24) (actual time=0.003..0.003 rows=0 loops=1)
+         Output: shop_accounts.id, shop_accounts.customer_id, shop_accounts.customer_carrier_id
+         Index Cond: (shop_accounts.id = '1'::bigint)
+   ->  Index Only Scan using customers_pkey on public.customers  (cost=0.15..8.17 rows=1 width=8) (never executed)
+         Output: customers.id
+         Index Cond: (customers.id = shop_accounts.customer_id)
+         Heap Fetches: 0
+ Planning Time: 0.063 ms
+ Execution Time: 0.011 ms
+(12 rows)
+```
+Using MySQL or MariaDB, the following
+```ruby
+Customer.where(id: 1).joins(:orders).explain(:analyze)
+```
+yields
+```sql
+ANALYZE SELECT `shop_accounts`.* FROM `shop_accounts` INNER JOIN `customers` ON `customers`.`id` = `shop_accounts`.`customer_id` WHERE `shop_accounts`.`id` = 1
++----+-------------+-------+------+---------------+------+---------+------+------+--------+----------+------------+--------------------------------+
+| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows | r_rows | filtered | r_filtered | Extra                          |
++----+-------------+-------+------+---------------+------+---------+------+------+--------+----------+------------+--------------------------------+
+|  1 | SIMPLE      | NULL  | NULL | NULL          | NULL | NULL    | NULL | NULL | NULL   | NULL     | NULL       | no matching row in const table |
++----+-------------+-------+------+---------------+------+---------+------+------+--------+----------+------------+--------------------------------+
+1 row in set (0.00 sec)
+```
+Please note that explain and analyze options vary across MySQL and MariaDB versions.
 
 ### Interpreting EXPLAIN
 

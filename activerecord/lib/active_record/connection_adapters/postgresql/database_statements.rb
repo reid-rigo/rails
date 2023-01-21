@@ -154,7 +154,7 @@ module ActiveRecord
         end
 
         def build_explain_clause(options = [])
-          return "EXPLAIN" unless options.present?
+          return "EXPLAIN" if options.empty?
 
           "EXPLAIN (#{options.join(", ").upcase})"
         end

@@ -39,21 +39,34 @@ class Mysql2ExplainTest < ActiveRecord::Mysql2TestCase
 
   private
 
-  def explain_option
-    conn.supports_analyze? || conn.supports_explain_analyze? ? :analyze : :extended
-  end
-
-  def expected_analyze_clause
-    if conn.supports_analyze?
-      "ANALYZE"
-    elsif conn.supports_explain_analyze?
-      "EXPLAIN ANALYZE"
-    else
-      "EXPLAIN EXTENDED"
+    def explain_option
+      supports_analyze? || supports_explain_analyze? ? :analyze : :extended
     end
-  end
 
-  def conn
-    ActiveRecord::Base.connection
-  end
+    def expected_analyze_clause
+      if supports_analyze?
+        "ANALYZE"
+      elsif supports_explain_analyze?
+        "EXPLAIN ANALYZE"
+      else
+        "EXPLAIN EXTENDED"
+      end
+    end
+
+    def supports_explain_analyze?
+      if conn.mariadb?
+        conn.database_version <= "10.0"
+      else
+        conn.database_version >= "6.0"
+      end
+    end
+
+    # https://mariadb.com/kb/en/analyze-statement/
+    def supports_analyze?
+      conn.mariadb? && conn.database_version >= "10.1.0"
+    end
+
+    def conn
+      ActiveRecord::Base.connection
+    end
 end

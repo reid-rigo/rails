@@ -61,6 +61,10 @@ module ActiveRecord
 
       def connection_explain(sql, binds, options)
         if connection.method(:explain).parameters.size == 2
+          ActiveRecord.deprecator.warn(<<~MSG.squish)
+            The current database adapter, #{connection.adapter_name}, does not support explain options.
+            To remove this warning, the adapter must implement `build_explain_clause(options = [])`.
+          MSG
           connection.explain(sql, binds)
         else
           connection.explain(sql, binds, options)

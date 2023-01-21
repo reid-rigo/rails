@@ -88,7 +88,7 @@ module ActiveRecord
 
           explain_clause = "EXPLAIN #{options.join(" ").upcase}"
 
-          if explain_clause.include?("ANALYZE") && supports_analyze?
+          if analyze_without_explain? && explain_clause.include?("ANALYZE")
             explain_clause.sub("EXPLAIN ", "")
           else
             explain_clause
@@ -206,6 +206,11 @@ module ActiveRecord
                 ret
               end
             end
+          end
+
+          # https://mariadb.com/kb/en/analyze-statement/
+          def analyze_without_explain?
+            mariadb? && database_version >= "10.1.0"
           end
       end
     end
